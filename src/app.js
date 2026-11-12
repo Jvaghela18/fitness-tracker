@@ -118,6 +118,47 @@
     img.src = URL.createObjectURL(file); container.innerHTML = ''; container.appendChild(img);
   }
   $('screenshotFile').onchange = () => previewImage($('screenshotFile'), $('screenshotPreview'));
+
+  // Groq key — stored ONLY in this browser's localStorage, never in code.
+  // Only the status is ever shown; the key value is never displayed.
+  const groqKey = () => { try { return localStorage.getItem('ft_groq_key') || ''; } catch { return ''; } };
+  function refreshGroqStatus() {
+    $('groqKeyStatus').textContent = groqKey() ? 'Groq key saved in this browser only.' : 'No Groq key saved — screenshot reading is reference-only. Save your own key above to turn on AI screenshot reading.';
+  }
+  $('saveGroqKey').onclick = () => {
+    const v = $('groqKey').value.trim();
+    if (!v) { $('groqKeyStatus').textContent = 'Paste your Groq key first.'; return; }
+    localStorage.setItem('ft_groq_key', v);
+    $('groqKey').value = '';
+    refreshGroqStatus(); status('Groq key saved in this browser only.');
+  };
+  $('clearGroqKey').onclick = () => {
+    localStorage.removeItem('ft_groq_key');
+    $('groqKey').value = '';
+    refreshGroqStatus(); status('Groq key cleared.');
+  };
+  $('readScreenshot').onclick = () => {
+    const file = $('screenshotFile').files && $('screenshotFile').files[0];
+    if (!file) { $('groqResult').textContent = 'Attach a screenshot first.'; return; }
+    const key = groqKey();
+    if (!key) { $('groqResult').textContent = 'No Groq key saved. Save your own key in Settings to read screenshots with AI, or look at the screenshot while you paste the text or type the numbers in.'; return; }
+    $('groqResult').textContent = 'Reading screenshot with Groq AI…';
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const { stats, modelUsed } = await FitnessGroq.extractStatsFromScreenshot({ apiKey: key, imageDataUrl: reader.result, mimeType: file.type || 'image/jpeg' });
+        const found = Object.entries(stats).filter(([, v]) => v != null);
+        if (!found.length) { $('groqResult').textContent = 'The AI could not see any stats in that screenshot. Try a clearer screenshot, or paste the stats text / type the numbers in.'; return; }
+        found.forEach(([k, v]) => { const el = $(k); if (el) el.value = v; });
+        $('groqResult').textContent = `AI read ${found.length} stat(s) (${modelUsed}): ${found.map(([k, v]) => k + ' ' + v).join(', ')}. Check them in the form, then press Save today.`;
+        renderInsights(readLog());
+      } catch (e) {
+        $('groqResult').textContent = (e && e.message) || 'Screenshot reading failed. No numbers were taken from the screenshot. Try paste-as-text or manual entry instead.';
+      }
+    };
+    reader.onerror = () => { $('groqResult').textContent = 'Could not read that image file. Try another screenshot, or paste the stats text instead.'; };
+    reader.readAsDataURL(file);
+  };
   $('mealPhoto').onchange = () => previewImage($('mealPhoto'), $('mealPhotoPreview'));
 
   $('goalsForm').onsubmit = e => {
@@ -152,5 +193,6 @@
     reader.readAsText(file);
   };
 
+  refreshGroqStatus();
   loadLog();
 })();

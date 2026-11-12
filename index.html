@@ -14,6 +14,7 @@
     <button data-tab="today" class="active">Today</button>
     <button data-tab="food">Food &amp; Macros</button>
     <button data-tab="watch">Watch &amp; Import</button>
+    <button data-tab="settings">Settings</button>
   </nav>
 </header>
 <main>
@@ -76,10 +77,12 @@
     <button id="parseText">Parse into form</button>
     <p id="parseResult"></p>
 
-    <h3>Screenshot (reference only)</h3>
-    <p><strong>This standalone version cannot read numbers from a screenshot.</strong> Attach one to look at while you paste the text or type the numbers in — the image is not analysed, and no numbers are taken from it.</p>
+    <h3>Screenshot — AI reading (optional, needs your Groq key)</h3>
+    <p>Attach a Zepp / Apple Health screenshot. <strong>If you have saved your own Groq API key in Settings</strong>, press “Read screenshot with AI” and the AI will read the numbers into the form for you to check — nothing saves until you press <strong>Save today</strong>. If you have no key saved, the screenshot is reference-only: look at it while you paste the text or type the numbers in.</p>
     <input type="file" id="screenshotFile" accept="image/*">
     <div id="screenshotPreview"></div>
+    <button id="readScreenshot">Read screenshot with AI</button>
+    <p id="groqResult"></p>
   </section>
 
   <!-- FOOD -->
@@ -144,10 +147,22 @@
     <button id="addFavWorkout">Save favourite workout</button>
     <div id="workoutFavs" class="row"></div>
   </section>
+
+  <!-- SETTINGS -->
+  <section id="tab-settings" class="tab hidden">
+    <h2>Settings — your Groq API key (optional)</h2>
+    <p>AI screenshot reading is optional and uses <strong>your own</strong> Groq API key. Get a free one at <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a> — sign up with email, no credit card — then paste it here. Your key is stored <strong>only in this browser's localStorage</strong>. It is never sent to any server except Groq, never put in the code, and never uploaded to GitHub. Only the status “key saved” is shown here — the key itself is never displayed.</p>
+    <label>Groq API key <input type="password" id="groqKey" autocomplete="off" placeholder="gsk_… (paste your key here)"></label>
+    <button id="saveGroqKey">Save key</button>
+    <button id="clearGroqKey">Clear key</button>
+    <p id="groqKeyStatus"></p>
+    <p>Without a key, screenshot reading stays reference-only, and paste-as-text, CSV import and manual entry still work.</p>
+  </section>
 </main>
 <footer><p>Starts empty — no made-up health history. Data is stored only in this browser.</p></footer>
 <script src="src/parser.js"></script>
 <script src="src/logic.js"></script>
+<script src="src/groq.js"></script>
 <script src="src/app.js"></script>
 </body>
 </html>
