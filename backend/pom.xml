@@ -48,6 +48,42 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
+      <!--
+        The backend serves the frontend itself: at build time the frontend
+        files from the repo root (index.html, styles.css, src/*.js) are
+        copied into target/classes/static, which Spring Boot serves at
+        http://localhost:8080/. This runs on every build (mvn test,
+        mvn spring-boot:run, mvn package), so the copied files can never
+        drift from the repo-root sources — there is no hand copy to keep
+        in sync. test/ is not copied: it is Node tests, not app files.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>copy-frontend</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/..</directory>
+                  <includes>
+                    <include>index.html</include>
+                    <include>styles.css</include>
+                    <include>src/**</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>

@@ -4,7 +4,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/** Allow the frontend (served on localhost:8000 / VS Code Live Server 5500) to call the API. */
+/**
+ * Same-origin calls (the app served by this backend on port 8080) need no
+ * CORS. This only covers the old two-server setup — the frontend served
+ * separately on localhost:8000 / VS Code Live Server 5500 — so that way
+ * still works too.
+ */
 @Configuration
 class WebConfig implements WebMvcConfigurer {
 

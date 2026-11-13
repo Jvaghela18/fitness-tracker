@@ -7,6 +7,7 @@
       "request": "launch",
       "mainClass": "com.recovery.RecoveryApplication",
       "projectName": "recovery-backend",
+      "preLaunchTask": "Copy frontend into backend static",
       "cwd": "${workspaceFolder}/backend",
       "args": "",
       "env": {

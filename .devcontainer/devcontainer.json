@@ -12,8 +12,7 @@
     "ghcr.io/devcontainers/features/python:1": {}
   },
   "forwardPorts": [
-    8080,
-    8000
+    8080
   ],
   "image": "mcr.microsoft.com/devcontainers/java:21",
   "name": "Recovery & Performance Tracker",

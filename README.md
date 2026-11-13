@@ -6,7 +6,7 @@ A single-page daily recovery & performance tracker: sleep, heart rate, HRV, stre
 
 It gives you a daily recovery score, a plain-language summary, and recommendations for sleep, eating, stress, movement and hydration.
 
-**Starts empty — no made-up health history.** Your data is stored only in your browser (localStorage). No account, no server, no data leaves your device.
+**Starts empty — no made-up health history.** Your data is stored in the app's own database on your computer when you run the backend, and in localStorage as an offline fallback when it is not running. No account, no data leaves your device.
 
 ## Who it's for
 
@@ -29,37 +29,25 @@ Built for someone with an Amazfit Active 2 smartwatch using the Zepp app on iPho
 
 ## Tech
 
-Plain HTML, CSS and JavaScript. No build step, no dependencies. Data in `localStorage` by default — and there is now an optional Java Spring Boot backend in `backend/` (see below) that stores daily logs, meals and goals in an H2 file database when it is running. The text parser (`src/parser.js`), the Groq screenshot reader (`src/groq.js`) and the recovery/macro/CSV logic (`src/logic.js`) are separate, testable modules that also work in Node.
+Plain HTML, CSS and JavaScript for the frontend, plus a Java Spring Boot backend in `backend/` that is part of the app: it stores daily logs, meals and goals in an H2 file database, and it serves the frontend itself. The text parser (`src/parser.js`), the Groq screenshot reader (`src/groq.js`) and the recovery/macro/CSV logic (`src/logic.js`) are separate, testable modules that also work in Node.
 
-## How to run
-
-Open `index.html` in a browser, or serve it locally:
-
-```bash
-python3 -m http.server 8000
-# then open http://localhost:8000
-```
-
-## Backend (optional): Java Spring Boot + REST API
-
-The frontend works fully on its own. If you want your logs stored on a server instead of only in one browser, run the backend in `backend/` — a Maven Spring Boot 3 project (Java 21) with Spring Web, Spring Data JPA and an H2 file database. It follows the Spring "Building REST services" tutorial pattern (JpaRepository, `@RestController`, constructor injection, GET/POST/PUT/DELETE, 404 advice) — adapted from the tutorial's Employee payroll example to this app's real data: daily logs, meals and goals.
-
-### Run it
+## How to run — one run, one app
 
 ```bash
 cd backend
 mvn spring-boot:run
-# backend on http://localhost:8080
+# then open http://localhost:8080 — the app AND the API, together
 ```
 
-Then serve the frontend in another terminal (from the repo root):
+That is the whole run: the backend serves the frontend at `http://localhost:8080/` and the API at `http://localhost:8080/api/*`. No second server is needed. If the backend is not running, the app can still be opened on its own (open `index.html`, or `python3 -m http.server 8000` from the repo root) and it falls back to localStorage on that device — that is the offline fallback, not the normal mode.
 
-```bash
-python3 -m http.server 8000
-# then open http://localhost:8000
-```
+## Backend: Java Spring Boot + REST API
 
-The frontend (`src/api.js`) tries the backend first and falls back to localStorage when it is not running, so the app never breaks if the backend is off. Daily logs are synced both ways on load; meals and goals stay in localStorage for now.
+The backend is part of the app, not a separate service. It is a Maven Spring Boot 3 project (Java 21) with Spring Web, Spring Data JPA and an H2 file database. It follows the Spring "Building REST services" tutorial pattern (JpaRepository, `@RestController`, constructor injection, GET/POST/PUT/DELETE, 404 advice) — adapted from the tutorial's Employee payroll example to this app's real data: daily logs, meals and goals.
+
+At build time the frontend files (`index.html`, `styles.css`, `src/*.js`) are copied into `target/classes/static` by the `copy-frontend` execution in `backend/pom.xml` (maven-resources-plugin, `process-resources` phase), so the copied files can never drift from the repo-root sources — there is no hand copy to keep in sync. Spring Boot then serves them as static files. In VS Code, F5 runs the same copy first (the launch config's `preLaunchTask`), so pressing F5 serves the app too.
+
+The frontend (`src/api.js`) calls the backend first — same-origin `/api` when the app is served by the backend, then `http://localhost:8080` — and falls back to localStorage only if no backend answers. Logs, meals and goals are all read from and written to the backend when it is up, and synced both ways on load so nothing is lost.
 
 Data is stored in `backend/data/recovery-db.mv.db` (H2 file database, so it survives restarts). No fake logs are preloaded — the app starts empty. Only the default macro goals (2200 kcal, 150g protein, 250g carbs, 70g fat) are created if none exist. Delete the `backend/data/` folder to start empty again.
 
@@ -102,7 +90,7 @@ curl 'localhost:8080/api/meals?date=2026-11-13'
 
 Backend tests: `cd backend && mvn test` (health, 404 for a missing log, default goals).
 
-### Server-side screenshot reading (optional)
+### Server-side screenshot reading (needs GROQ_API_KEY)
 
 `POST /api/screenshot` (multipart `image` field) calls Groq's vision model `qwen/qwen3.8-27b` from the server — but only if the `GROQ_API_KEY` environment variable is set when the backend starts:
 
@@ -118,13 +106,13 @@ I cannot connect to VS Code on your own computer — there is no such access —
 
 1. Open this repo folder in VS Code.
 2. Accept the recommended extensions when VS Code offers them (also in `.vscode/extensions.json`): **Extension Pack for Java** (`vscjava.vscode-java-pack`) and **Spring Boot Extension Pack** (`vmware.vscode-spring-boot`).
-3. Press **F5** (or Run → Start Debugging) with the launch config "Run Recovery Backend (Spring Boot, port 8080)" in `.vscode/launch.json` — it runs `com.recovery.RecoveryApplication` from `backend/` on port 8080. Or use Terminal → Run Task → "Run backend (Spring Boot, port 8080)" from `.vscode/tasks.json`.
-4. Run the "Serve frontend (port 8000)" task too, then open http://localhost:8000.
-5. Alternative: reopen the folder in a container (Command Palette → "Dev Containers: Reopen in Container") — `.devcontainer/devcontainer.json` uses the Java 21 + Maven image (`mcr.microsoft.com/devcontainers/java:21`) with those extensions preinstalled, and forwards ports 8080 and 8000.
+3. Press **F5** (or Run → Start Debugging) with the launch config "Run Recovery Backend (Spring Boot, port 8080)" in `.vscode/launch.json` — it first copies the frontend into the backend's static files (the launch config's `preLaunchTask`), then runs `com.recovery.RecoveryApplication` from `backend/` on port 8080. Or use Terminal → Run Task → "Run backend (Spring Boot, port 8080)" from `.vscode/tasks.json`.
+4. Open http://localhost:8080 — the app and the API together. No second server, no port 8000.
+5. Alternative: reopen the folder in a container (Command Palette → "Dev Containers: Reopen in Container") — `.devcontainer/devcontainer.json` uses the Java 21 + Maven image (`mcr.microsoft.com/devcontainers/java:21`) with those extensions preinstalled, and forwards port 8080.
 
 ### Honest limit
 
-The backend runs **locally** — it is not deployed to the internet. Anyone else opening the app without running the backend just gets the localStorage version, which is the same app, minus server storage.
+The backend runs **locally** — it is not deployed to the internet. If the backend is not running, the app falls back to localStorage on that device only, and that data does not leave that device or sync anywhere.
 
 ## How to use
 
@@ -170,9 +158,9 @@ index.html          Single-page app
 styles.css          Styling
 src/parser.js       Paste-as-text parser (browser + Node)
 src/groq.js         Optional Groq AI screenshot reading (browser + Node, key in localStorage only)
-src/api.js          Optional backend client (tries localhost:8080, falls back to localStorage)
+src/api.js          Backend client (same-origin /api first, then localhost:8080, localStorage only as offline fallback)
 src/logic.js        Recovery score, summary, recommendations, macros, CSV
-src/app.js          UI glue, localStorage (+ backend sync for daily logs when it is running)
+src/app.js          UI glue — backend is the primary store, localStorage is the offline fallback
 test/parser.test.js Node tests, no dependencies
 test/groq.test.js    Node tests with mock Groq replies, no real key, no network
 backend/            Java 21 Spring Boot REST backend (Web, JPA, H2 file DB)
