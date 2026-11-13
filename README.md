@@ -1,8 +1,8 @@
-# Fitness Tracker
+# Vitalis
 
 Built by Jay Vaghela — Rutgers University, Computer Science.
 
-A single-page web app to track daily fitness: sleep, heart rate, HRV, stress, steps, workouts, weight, water, mood and energy — plus a macro tracker for calories, protein, carbs and fat.
+Vitalis is a single-page daily recovery tracker: sleep, heart rate, HRV, stress, steps, workouts, weight, water, mood and energy — plus a macro tracker for calories, protein, carbs and fat.
 
 It gives you a daily recovery score, a plain-language summary, and recommendations for sleep, eating, stress, movement and hydration.
 
