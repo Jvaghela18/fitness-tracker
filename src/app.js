@@ -17,6 +17,27 @@
   const todayStr = () => new Date().toISOString().slice(0, 10);
   const dateVal = () => $('date').value || todayStr();
   const logs = () => store.get('ft_logs', {});
+  // Optional backend: if the Spring Boot backend is running on
+  // localhost:8080, daily logs are also saved there. If it is not running,
+  // everything still works from localStorage alone.
+  let backendOn = false;
+  async function syncLogsFromBackend() {
+    try {
+      if (typeof FitnessApi === 'undefined') return;
+      backendOn = await FitnessApi.health();
+      if (!backendOn) return;
+      const remote = await FitnessApi.getAllLogs();
+      if (!remote) { backendOn = false; return; }
+      // Merge both ways so nothing is lost: local first, backend wins on
+      // the same date, then push any local-only dates up to the backend.
+      const local = logs();
+      const merged = { ...local, ...remote };
+      store.set('ft_logs', merged);
+      for (const [d, l] of Object.entries(local)) {
+        if (!remote[d]) await FitnessApi.saveLog(d, l);
+      }
+    } catch { backendOn = false; }
+  }
   const mealsFor = d => store.get('ft_meals', {})[d] || [];
 
   function status(msg) { $('status').textContent = msg; setTimeout(() => $('status').textContent = '', 4000); }
@@ -87,9 +108,10 @@
   $('logForm').onsubmit = e => {
     e.preventDefault();
     const all = logs(); all[dateVal()] = readLog(); store.set('ft_logs', all);
+    if (backendOn && typeof FitnessApi !== 'undefined') FitnessApi.saveLog(dateVal(), all[dateVal()]);
     renderInsights(all[dateVal()]); status('Saved.');
   };
-  $('deleteLog').onclick = () => { const all = logs(); delete all[dateVal()]; store.set('ft_logs', all); loadLog(); status('Deleted.'); };
+  $('deleteLog').onclick = () => { const all = logs(); delete all[dateVal()]; store.set('ft_logs', all); if (backendOn && typeof FitnessApi !== 'undefined') FitnessApi.deleteLog(dateVal()); loadLog(); status('Deleted.'); };
   $('copyYesterday').onclick = () => {
     const d = new Date(dateVal()); d.setDate(d.getDate() - 1);
     const y = logs()[d.toISOString().slice(0, 10)];
@@ -187,6 +209,7 @@
     reader.onload = () => {
       const rows = FitnessLogic.parseCsv(reader.result);
       const all = logs(); rows.forEach(r => { if (r.date) all[r.date] = r; }); store.set('ft_logs', all);
+      if (backendOn && typeof FitnessApi !== 'undefined') rows.forEach(r => { if (r.date) FitnessApi.saveLog(r.date, r); });
       $('csvResult').textContent = `Imported ${rows.length} day(s) from CSV.`;
       loadLog();
     };
@@ -195,4 +218,6 @@
 
   refreshGroqStatus();
   loadLog();
+  // If the backend is up, sync logs from it, then re-render.
+  syncLogsFromBackend().then(() => loadLog());
 })();

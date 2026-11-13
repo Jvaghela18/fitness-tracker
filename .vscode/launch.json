@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Run Recovery Backend (Spring Boot, port 8080)",
+      "request": "launch",
+      "mainClass": "com.recovery.RecoveryApplication",
+      "projectName": "recovery-backend",
+      "cwd": "${workspaceFolder}/backend",
+      "args": "",
+      "env": {
+        // Optional: set GROQ_API_KEY here to turn on the server-side
+        // screenshot endpoint (POST /api/screenshot). Leave it out and
+        // that endpoint returns 501 — the browser Settings key still works.
+        // Never paste a real key into this file and commit it.
+      }
+    }
+  ]
+}

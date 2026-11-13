@@ -1,0 +1,22 @@
+{
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-spring-boot"
+      ]
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/python:1": {}
+  },
+  "forwardPorts": [
+    8080,
+    8000
+  ],
+  "image": "mcr.microsoft.com/devcontainers/java:21",
+  "name": "Recovery & Performance Tracker",
+  "postCreateCommand": "mvn -f backend/pom.xml -q dependency:go-offline || true",
+  "remoteUser": "vscode"
+}

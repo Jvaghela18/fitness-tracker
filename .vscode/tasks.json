@@ -1,0 +1,44 @@
+{
+  "tasks": [
+    {
+      "command": "mvn -f backend/pom.xml spring-boot:run",
+      "label": "Run backend (Spring Boot, port 8080)",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "panel": "new",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "python3 -m http.server 8000",
+      "label": "Serve frontend (port 8000)",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "panel": "new",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
+      "command": "mvn -f backend/pom.xml test",
+      "label": "Run backend tests",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "panel": "new",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    }
+  ],
+  "version": "2.0.0"
+}

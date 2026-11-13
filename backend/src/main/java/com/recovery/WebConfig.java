@@ -1,0 +1,19 @@
+package com.recovery;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+/** Allow the frontend (served on localhost:8000 / VS Code Live Server 5500) to call the API. */
+@Configuration
+class WebConfig implements WebMvcConfigurer {
+
+  @Override
+  public void addCorsMappings(CorsRegistry registry) {
+    registry.addMapping("/api/**")
+        .allowedOrigins("http://localhost:8000", "http://127.0.0.1:8000",
+            "http://localhost:5500", "http://127.0.0.1:5500")
+        .allowedMethods("GET", "POST", "PUT", "DELETE")
+        .allowedHeaders("*");
+  }
+}

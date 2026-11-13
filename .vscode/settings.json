@@ -1,0 +1,19 @@
+{
+  // Recovery & Performance Tracker — VS Code settings
+  // Java 21, Maven project in backend/
+  // Java 21: VS Code uses the JDK on your PATH / JAVA_HOME.
+  // (No path is hard-coded here, so this works on Mac, Windows and Linux.)
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-21",
+      "default": true
+    }
+  ],
+  "java.compile.nullAnalysis.mode": "automatic",
+  "maven.terminal.useJavaHome": true,
+  "editor.formatOnSave": true,
+  "files.exclude": {
+    "backend/data": true,
+    "backend/target": true
+  }
+}
