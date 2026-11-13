@@ -16,7 +16,7 @@ Built for someone with an Amazfit Active 2 smartwatch using the Zepp app on iPho
 
 - Go to **Settings**, paste your own free Groq API key (get one at [console.groq.com](https://console.groq.com) — email signup, no credit card), and press **Save key**. The key is stored only in that browser's localStorage. It is never in the code, never displayed (only "key saved" is shown), and never uploaded to GitHub.
 - Then, in the Today tab, attach a Zepp / Apple Health screenshot and press **Read screenshot with AI**. Groq's vision model reads the visible numbers into the form for you to check before you save. Nothing saves until you press **Save today**.
-- The model used is `qwen/qwen3.8-27b` — the only vision-capable model on Groq as of Nov 12, 2026 (verified live against Groq's model list; the earlier `qwen/qwen3-vl-32b` name does not exist on Groq, and there is no vision fallback). Tested with a real Groq key on a sample screenshot: 9/9 correct — sleep 7.33h, score 84, deep 90 min, REM 110 min, resting HR 58, HRV 64, stress 32, steps 8432, weight 74.5 kg, with nulls for values not shown.
+- The model used is `qwen/qwen3.8-27b` — the only vision-capable model on Groq as of Nov 12, 2026 (verified live against Groq's model list; the earlier `qwen/qwen3-vl-32b` name does not exist on Groq, and there is no vision fallback). **Tested with a real Groq key on Nov 12, 2026: 9/9 correct on a sample Zepp screenshot** — sleep 7.33h, score 84, deep 90 min, REM 110 min, resting HR 58, HRV 64, stress 32, steps 8432, weight 74.5 kg. That is one sample, not a guarantee for every screenshot, so still check the numbers before saving.
 - Without a key, screenshot reading stays reference-only, exactly as before. If the AI call fails (bad key, rate limit, network), the app shows an honest error and offers paste-as-text / manual entry — it never invents numbers.
 
 ## Features
@@ -75,7 +75,7 @@ Plain Node, no dependencies. It covers:
 - A stress score is never mistaken for a sleep score in the returned JSON
 - Missing fields become null, not invented
 - No key, a failed call (bad key, 401), and a non-JSON reply all return an honest error with no numbers
-- If the primary vision model is unavailable (404), it retries once with the fallback model
+- If the primary vision model is unavailable (404), it returns an honest error with no numbers — there is no other vision model on Groq to fall back to
 
 ## Project structure
 
