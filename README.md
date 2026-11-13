@@ -1,8 +1,8 @@
-# Vitalis
+# Recovery & Performance Tracker
 
 Built by Jay Vaghela — Rutgers University, Computer Science.
 
-Vitalis is a single-page daily recovery tracker: sleep, heart rate, HRV, stress, steps, workouts, weight, water, mood and energy — plus a macro tracker for calories, protein, carbs and fat.
+A single-page daily recovery & performance tracker: sleep, heart rate, HRV, stress, steps, workouts, weight, water, mood and energy — plus a macro tracker for calories, protein, carbs and fat.
 
 It gives you a daily recovery score, a plain-language summary, and recommendations for sleep, eating, stress, movement and hydration.
 
